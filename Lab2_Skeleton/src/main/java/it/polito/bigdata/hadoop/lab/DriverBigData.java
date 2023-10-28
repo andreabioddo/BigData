@@ -5,6 +5,8 @@ import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -48,7 +50,6 @@ public class DriverBigData extends Configured implements Tool {
     // Assign a name to the job
     job.setJobName("Lab2");
 
-    
 
     // Set path of the input file/folder (if it is a folder, the job reads all the
     // files in the specified folder) for this job
@@ -67,7 +68,7 @@ public class DriverBigData extends Configured implements Tool {
     job.setOutputFormatClass(TextOutputFormat.class);
 
     // Set map class
-    job.setMapperClass(MapperBigDataBonuesTrack.class);
+    job.setMapperClass(MapperBigData.class);
 
     // Set map output key and value classes
     job.setMapOutputKeyClass(Text.class);
@@ -81,9 +82,17 @@ public class DriverBigData extends Configured implements Tool {
      job.setNumReduceTasks(numberOfReducers);
 
     // Execute the job and wait for completion
-    if (job.waitForCompletion(true) == true)
+    if (job.waitForCompletion(true)){
       exitCode = 0;
-    else
+
+      Counters counters = job.getCounters();
+      Counter discarded = counters.findCounter("Filter", "Discarded");
+      Counter tot = counters.findCounter("Filter", "Total");
+      
+      System.out.println("Discarded values: " + discarded.getValue());
+      System.out.println("Total values: " + tot.getValue());
+      
+    }else
       exitCode = 1;
 
     return exitCode;
@@ -95,6 +104,8 @@ public class DriverBigData extends Configured implements Tool {
    */
 
   public static void main(String args[]) throws Exception {
+
+    
     // Exploit the ToolRunner class to "configure" and run the Hadoop application
     int res = ToolRunner.run(new Configuration(), new DriverBigData(), args);
     System.exit(res);

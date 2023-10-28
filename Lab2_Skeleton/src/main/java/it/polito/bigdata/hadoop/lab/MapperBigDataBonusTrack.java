@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import org.apache.hadoop.conf.Configuration;
@@ -26,6 +27,12 @@ class MapperBigDataBonuesTrack extends Mapper<
         String[] words = value.toString().split("\\s+");
         if(words[0].contains(param) || words[1].contains(param)){
             context.write(new Text(words[0] + " " + words[1]), new IntWritable(Integer.parseInt(words[2])));
-        }
+        }  else {
+            Counter customCounter = context.getCounter("Filter", "Discarded");
+            customCounter.increment(1);
+        }   
+
+        Counter customCounter = context.getCounter("Filter", "Total");
+        customCounter.increment(1);
     }
 }
