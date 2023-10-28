@@ -28,13 +28,19 @@ public class DriverBigData extends Configured implements Tool {
     int numberOfReducers;
 
     // Parse the parameters
-    // numberOfReducers = Integer.parseInt(args[0]);
+    numberOfReducers = Integer.parseInt(args[3]);
     inputPath = new Path(args[0]);
     outputDir = new Path(args[1]);
 
     Configuration conf = this.getConf();
 
-    conf.set("startString", args[2]);
+    if(!args[2].equals("")){
+      conf.set("startString", args[2]);
+    }
+
+    if(!args[4].equals("")){
+      conf.set("contains", args[4]);
+    }
 
     // Define a new job
     Job job = Job.getInstance(conf);
@@ -61,21 +67,18 @@ public class DriverBigData extends Configured implements Tool {
     job.setOutputFormatClass(TextOutputFormat.class);
 
     // Set map class
-    job.setMapperClass(MapperBigData.class);
+    job.setMapperClass(MapperBigDataBonuesTrack.class);
 
     // Set map output key and value classes
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(IntWritable.class);
-
-    // Set reduce class
-    // job.setReducerClass(ReducerBigData.class);
 
     // Set reduce output key and value classes
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(IntWritable.class);
 
     // Set number of reducers
-    // job.setNumReduceTasks(numberOfReducers);
+     job.setNumReduceTasks(numberOfReducers);
 
     // Execute the job and wait for completion
     if (job.waitForCompletion(true) == true)
@@ -94,7 +97,6 @@ public class DriverBigData extends Configured implements Tool {
   public static void main(String args[]) throws Exception {
     // Exploit the ToolRunner class to "configure" and run the Hadoop application
     int res = ToolRunner.run(new Configuration(), new DriverBigData(), args);
-    System.out.println(res);
     System.exit(res);
   }
 }
